@@ -16,12 +16,15 @@ class KeepMajorityKeepOldestMultiJvm3 extends AbstractDowningSpec(KeepMajority.N
 class KeepMajorityKeepOldestMultiJvm4 extends AbstractDowningSpec(KeepMajority.NoRolesConfig, 1,2,3)
 class KeepMajorityKeepOldestMultiJvm5 extends AbstractDowningSpec(KeepMajority.NoRolesConfig, 1,2,3)
 
+// TODO: aus meiner Sicht testet dieser Tests nichts weiter als das was der darüber tut?
 class KeepMajorityLoseOldestMultiJvm0 extends AbstractDowningSpec(KeepMajority.NoRolesConfig, 3,4,5)
 class KeepMajorityLoseOldestMultiJvm1 extends AbstractDowningSpec(KeepMajority.NoRolesConfig, 3,4,5)
 class KeepMajorityLoseOldestMultiJvm2 extends AbstractDowningSpec(KeepMajority.NoRolesConfig, 3,4,5)
 class KeepMajorityLoseOldestMultiJvm3 extends AbstractDowningSpec(KeepMajority.NoRolesConfig, 3,4,5)
 class KeepMajorityLoseOldestMultiJvm4 extends AbstractDowningSpec(KeepMajority.NoRolesConfig, 3,4,5)
 class KeepMajorityLoseOldestMultiJvm5 extends AbstractDowningSpec(KeepMajority.NoRolesConfig, 3,4,5)
+
+
 
 class KeepMajorityRoleWithOldest1MultiJvm0 extends AbstractDowningSpec(KeepMajority.RoleWithOldestConfig, 1,2)
 class KeepMajorityRoleWithOldest1MultiJvm1 extends AbstractDowningSpec(KeepMajority.RoleWithOldestConfig, 1,2)

@@ -12,13 +12,14 @@ import scala.concurrent.Await
   * This class exposes some cluster state via HTTP to facilitate testing
   */
 class ClusterHttpInspector(httpPort: Int) extends Actor {
-  val cluster = Cluster.get(context.system)
-  val routes = {
+  private val cluster = Cluster.get(context.system)
+  private val routes = {
     import Directives._
 
     pathPrefix("cluster-members") {
       path("up") { complete {
-        cluster.state.members.filter(_.status == MemberStatus.Up).map(_.address.port.get).mkString(" ")
+        // TODO: the member status UP does not mean that a member is not reachable
+        cluster.state.members.diff(cluster.state.unreachable).map(_.address.port.get).mkString(" ")
       }} ~
       path("unreachable") { complete {
         cluster.state.unreachable.map(_.address.port.get).mkString(" ")
@@ -27,9 +28,9 @@ class ClusterHttpInspector(httpPort: Int) extends Actor {
   }
 
   import context.dispatcher
-  implicit val mat = ActorMaterializer()
+  private implicit val mat = ActorMaterializer()
 
-  val fServerBinding =
+  private val fServerBinding =
     Http(context.system)
       .bindAndHandle(routes, "localhost", httpPort)
 

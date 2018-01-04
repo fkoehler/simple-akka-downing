@@ -75,6 +75,8 @@ private[simpleakkadowning] class DowningActor(stableInterval: FiniteDuration, de
     case SplitBrainDetected(clusterState) if iAmResponsibleAction(clusterState) =>
       log.error("Network partition detected. I am the responsible node in the surviving partition --> terminating unreachable nodes {}", cluster.state.unreachable)
       cluster.state.unreachable.foreach(m => cluster.down(m.address))
+
+      // TODO: something is wrong here .. this also matches for non majority nodes in keep-majority
     case SplitBrainDetected(clusterState) =>
       log.info("Network partition detected. I am in the surviving partition, but I am not the responsible node, so nothing needs to be done")
   }

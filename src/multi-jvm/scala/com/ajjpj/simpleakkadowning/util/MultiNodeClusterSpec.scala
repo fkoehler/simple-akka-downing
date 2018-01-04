@@ -70,20 +70,21 @@ abstract class MultiNodeClusterSpec(config: SimpleDowningConfig) extends MultiNo
       system.actorOf(Props(new ClusterHttpInspector(httpPort(myself))), "http-server")
       awaitMembersUp(numberOfMembers = roles.length)
     }
+    println(" entering BARRIER ------------- " + roles.map(_.name).mkString("-") + "-joined")
     enterBarrier(roles.map(_.name).mkString("-") + "-joined")
   }
 
-  def httpPort (node: RoleName) = {
+  private def httpPort (node: RoleName) = {
     val nodeNo = roles.indexOf(node)
     require(nodeNo > 0)
     8080 + nodeNo
   }
 
-  def awaitMembersUp(numberOfMembers:          Int,
-                     canNotBePartOfMemberRing: Set[Address]   = Set.empty,
-                     timeout:                  FiniteDuration = 25.seconds): Unit = {
+  private def awaitMembersUp(numberOfMembers:          Int,
+                             canNotBePartOfMemberRing: Set[Address]   = Set.empty,
+                             timeout:                  FiniteDuration = 25.seconds): Unit = {
     within(timeout) {
-      if (!canNotBePartOfMemberRing.isEmpty) // don't run this on an empty set
+      if (canNotBePartOfMemberRing.nonEmpty) // don't run this on an empty set
         awaitAssert(canNotBePartOfMemberRing foreach (a ⇒ cluster.state.members.map(_.address) should not contain (a)))
       awaitAssert(cluster.state.members.size should ===(numberOfMembers))
       awaitAssert(cluster.state.members.map(_.status) should ===(Set(MemberStatus.Up)))
@@ -95,7 +96,7 @@ abstract class MultiNodeClusterSpec(config: SimpleDowningConfig) extends MultiNo
     }
   }
 
-  def startClusterNode(): Unit = {
+  private def startClusterNode(): Unit = {
     if (cluster.state.members.isEmpty) {
       cluster join myself
       awaitAssert(cluster.state.members.map(_.address) should contain(address(myself)))
@@ -124,13 +125,13 @@ abstract class MultiNodeClusterSpec(config: SimpleDowningConfig) extends MultiNo
   /**
     * Marks a node as available in the failure detector
     */
-  def markNodeAsAvailable(address: Address): Unit =
+  private def markNodeAsAvailable(address: Address): Unit =
     failureDetectorPuppet(address) foreach (_.markNodeAsAvailable())
 
   /**
     * Marks a node as unavailable in the failure detector
     */
-  def markNodeAsUnavailable(address: Address): Unit = {
+  private def markNodeAsUnavailable(address: Address): Unit = {
     // before marking it as unavailable there should be at least one heartbeat
     // to create the FailureDetectorPuppet in the FailureDetectorRegistry
     cluster.failureDetector.heartbeat(address)
@@ -181,7 +182,9 @@ abstract class MultiNodeClusterSpec(config: SimpleDowningConfig) extends MultiNo
       sys.eventStream.publish(Mute(EventFilter.info(pattern = ".*Marking.* as REACHABLE.*")))
 
 
-  private def portToNode(port: Int) = roles.filter(address(_).port contains port).head
+  def upNodesFor(node: RoleName): Set[RoleName] = httpGetNodes(node, "/cluster-members/up")
+
+  def unreachableNodesFor(node: RoleName): Set[RoleName] = httpGetNodes(node, "/cluster-members/unreachable")
 
   private def httpGetNodes(node: RoleName, path: String): Set[RoleName] = {
     try {
@@ -202,6 +205,6 @@ abstract class MultiNodeClusterSpec(config: SimpleDowningConfig) extends MultiNo
     }
   }
 
-  def upNodesFor(node: RoleName) = httpGetNodes(node, "/cluster-members/up")
-  def unreachableNodesFor (node: RoleName) = httpGetNodes(node, "/cluster-members/unreachable")
+  def portToNode(port: Int): RoleName = roles.filter(address(_).port contains port).head
+
 }

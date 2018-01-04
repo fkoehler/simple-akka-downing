@@ -22,7 +22,6 @@ lazy val `simple-akka-downing` = (project in file("."))
   .configs(MultiJvm)
   .settings(
     name := "simple-akka-downing",
-
     libraryDependencies += akkaCluster,
 
     libraryDependencies += akkaHttp % Test,

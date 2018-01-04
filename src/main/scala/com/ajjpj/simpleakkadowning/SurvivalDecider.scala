@@ -21,7 +21,7 @@ object SurvivalDecider {
 
   case class ClusterMemberInfo(uniqueAddress: UniqueAddress, roles: Set[String], member: Member)
   case class ClusterState(upMembers: Set[ClusterMemberInfo], unreachable: Set[UniqueAddress]) {
-    lazy val sortedUpMembers = SortedSet.empty(memberOrdering) ++  upMembers
+    lazy val sortedUpMembers = SortedSet.empty(memberOrdering) ++ upMembers
     lazy val sortedUpAndReachable = sortedUpMembers.filterNot (x => unreachable.contains(x.uniqueAddress))
     lazy val upReachable = upMembers.filterNot(x => unreachable(x.uniqueAddress))
     lazy val upUnreachable = upMembers.filter(x => unreachable(x.uniqueAddress))
